@@ -21,5 +21,5 @@ out/%.o: src/%.c $(wildcard src/*.h)
 
 $(BINARY): $(OBJECTS)
 	gcc $^ \
-		-L/usr/lib/x86_64-linux-gnu -lbluetooth \
+		-lbluetooth -lpthread \
 		-o $@

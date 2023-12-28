@@ -69,6 +69,7 @@ void receive_event_loop(const int device_handle, const void (*handle_matching_ev
     socklen_t old_filter_length = sizeof(old_filter);
     if (getsockopt(device_handle, SOL_HCI, HCI_FILTER, &old_filter, &old_filter_length) < 0) {
         perror("Could not retrieve old filter");
+        signal_exit_needed();
         return;
     }
 
@@ -77,6 +78,7 @@ void receive_event_loop(const int device_handle, const void (*handle_matching_ev
     hci_filter_set_event(EVT_LE_META_EVENT, &new_filter);
     if (setsockopt(device_handle, SOL_HCI, HCI_FILTER, &new_filter, sizeof(new_filter)) < 0) {
         perror("Could not set filter on HCI device");
+        signal_exit_needed();
         return;
     }
 
