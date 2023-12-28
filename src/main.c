@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <signal.h>
+#include <bits/sigthread.h>
 
 #include "interrupts.h"
 
@@ -25,15 +27,23 @@ static void panic(const char *const string) {
     exit(1);
 }
 
-int main(void) {
-    setup_interrupt_trapping();
+static pthread_t prom_thread;
+static pthread_t ble_thread;
 
-    pthread_t prom_thread;
+static void interrupt_all() {
+    pthread_kill(prom_thread, SIGALRM);
+    pthread_kill(ble_thread, SIGALRM);
+}
+
+int main(void) {
+    setup_dummy_trap(SIGALRM);
+
     if (pthread_create(&prom_thread, NULL, prom_routine, NULL) != 0)
         panic("Could not create Prometheus thread");
-    pthread_t ble_thread;
     if (pthread_create(&ble_thread, NULL, ble_routine, NULL) != 0)
         panic("Could not create BLE thread");
+
+    setup_interrupt_trapping(interrupt_all);
 
     if (pthread_join(ble_thread, NULL) != 0)
         panic("Could not join with BLE thread");

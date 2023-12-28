@@ -37,7 +37,10 @@ static void receive_events(const int device_handle, const void (*handle_matching
         ssize_t length_read;
         while ((length_read = read(device_handle, buf, sizeof(buf))) <= 0) {
             if (errno == EINTR && exit_requested()) return;
-            if (errno != EAGAIN && errno != EINTR) return;
+            if (errno != EAGAIN && errno != EINTR) {
+                perror("Could not read BLE event");
+                return;
+            }
             if (length_read == 0) return; // EoF, e.g. perhaps the device was removed
             usleep(100);
         }

@@ -1,7 +1,9 @@
 #ifndef INTERRUPTS_H
 #define INTERRUPTS_H
 
-void setup_interrupt_trapping();
+void setup_interrupt_trapping(const void (*callback)());
+
+void setup_dummy_trap(int sig_num);
 
 void signal_exit_needed();
 
