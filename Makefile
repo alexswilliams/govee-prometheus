@@ -3,7 +3,8 @@ OBJECTS:= \
 	out/main.o \
 	out/interrupts.o \
 	out/govee.o \
-	out/bluetooth_eir.o
+	out/bluetooth_eir.o \
+	out/scan.o
 BINARY:=bin/monitor
 
 .PHONY: clean all

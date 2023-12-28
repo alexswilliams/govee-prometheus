@@ -14,6 +14,6 @@ void setup_interrupt_trapping() {
     sigaction(SIGINT, &signal, NULL);
 }
 
-int get_last_signal() {
-    return __trapped_signal;
+int exit_requested() {
+    return __trapped_signal == SIGINT;
 }

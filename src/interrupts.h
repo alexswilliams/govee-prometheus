@@ -3,5 +3,5 @@
 
 void setup_interrupt_trapping();
 
-int get_last_signal();
+int exit_requested();
 #endif // INTERRUPTS_H
