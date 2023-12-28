@@ -7,7 +7,8 @@ OBJECTS:= \
 	out/scan.o \
 	out/bluetooth_entrypoint.o \
 	out/prom_entrypoint.o \
-	out/device_list.o
+	out/device_list.o \
+	out/metrics.o
 BINARY:=bin/monitor
 
 .PHONY: clean all

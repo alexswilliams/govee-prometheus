@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <asm-generic/errno-base.h>
@@ -7,15 +8,26 @@
 #include <sys/socket.h>
 
 #include "interrupts.h"
+#include "metrics.h"
 
 
-static const char *build_metrics_response(void) {
-    return "HTTP/1.0 200 OK\n"
-            "Connection: Close\n"
-            "Content-Type: text/plain\n"
-            "Content-Length: 3\n"
-            "\n"
-            "Hi!";
+static char *build_metrics_response() {
+    char *const metrics = build_metrics();
+    if (metrics == NULL) {
+        return strdup("HTTP/1.0 500 Internal Server Error\nConnection: Close\n\n");
+    }
+    const size_t buf_size = strlen(metrics) + 200;
+    char *const buf = malloc(buf_size);
+    snprintf(buf, buf_size,
+             "HTTP/1.0 200 OK\n"
+             "Connection: Close\n"
+             "Content-Type: text/plain\n"
+             "Content-Length: %lu\n"
+             "\n"
+             "%s",
+             strlen(metrics), metrics);
+    free(metrics);
+    return buf;
 }
 
 static void respond_with_404(const int client_fd) {
@@ -45,8 +57,9 @@ static void handle_incoming_request(const int client_fd) {
         respond_with_404(client_fd);
         return;
     }
-    const char *metrics = build_metrics_response();
+    char *const metrics = build_metrics_response();
     send(client_fd, metrics, strlen(metrics), 0);
+    free(metrics);
 }
 
 static void accept_clients(const int server_fd) {

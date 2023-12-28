@@ -5,15 +5,11 @@
 
 #include "govee.h"
 
-typedef struct _device_list_entry {
-    struct _device_list_entry *next;
-    sensor_data data;
-    char *address;
-    char *name;
-    uint64_t last_seen;
-} device_list_entry;
-
 static volatile device_list_entry *list = NULL;
+
+device_list_entry *device_list_raw() {
+    return (device_list_entry *) list;
+}
 
 static uint64_t now() {
     struct timespec tp;
@@ -37,6 +33,7 @@ static void add_new_sensor(const char *const address, const char *const name, co
     new_sensor->address = strdup(address);
     new_sensor->name = strdup(name);
     memcpy(&new_sensor->data, data, sizeof(new_sensor->data));
+    new_sensor->last_seen = now();
     list = new_sensor;
 }
 
@@ -54,7 +51,6 @@ void add_or_update_sensor_by_address(const char *const address, const char *cons
         existing_sensor->last_seen = now();
     }
 }
-
 
 
 void destory_device_list() {
