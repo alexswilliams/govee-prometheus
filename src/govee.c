@@ -6,13 +6,8 @@
 #include <bluetooth/hci.h>
 
 #include "bluetooth_eir.h"
+#include "device_list.h"
 
-typedef struct {
-    int has_error;
-    uint8_t battery_percent;
-    float temperature;
-    float humidity;
-} sensor_data;
 
 typedef struct {
     uint32_t data_word;
@@ -66,6 +61,7 @@ void handle_govee_event_advertising_packet(const le_advertising_info *const info
     const govee_payload *const payload = (govee_payload *) meta_payload->data;
     sensor_data result;
     interpret_payload(payload, &result);
+    add_or_update_sensor_by_address(address, name, &result);
     printf(
         "Error: %d, Battery: %d%%; Temp: %4.1f°C; Humidity: %4.1f%%, MAC: %s, Name: %s, Device: %s\n",
         result.has_error, result.battery_percent, result.temperature,

@@ -6,7 +6,8 @@ OBJECTS:= \
 	out/bluetooth_eir.o \
 	out/scan.o \
 	out/bluetooth_entrypoint.o \
-	out/prom_entrypoint.o
+	out/prom_entrypoint.o \
+	out/device_list.o
 BINARY:=bin/monitor
 
 .PHONY: clean all

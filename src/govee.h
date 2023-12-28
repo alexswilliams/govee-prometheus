@@ -4,5 +4,12 @@
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 
+typedef struct {
+    int has_error;
+    uint8_t battery_percent;
+    float temperature;
+    float humidity;
+} sensor_data;
+
 void handle_govee_event_advertising_packet(const le_advertising_info *info);
 #endif // GOVEE_H

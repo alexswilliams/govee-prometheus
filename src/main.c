@@ -4,6 +4,7 @@
 #include <signal.h>
 #include <bits/sigthread.h>
 
+#include "device_list.h"
 #include "interrupts.h"
 
 void ble_thread_entrypoint();
@@ -36,20 +37,17 @@ static void interrupt_all() {
 }
 
 int main(void) {
+    if (pthread_create(&prom_thread, NULL, prom_routine, NULL) != 0) panic("Could not create Prometheus thread");
+    if (pthread_create(&ble_thread, NULL, ble_routine, NULL) != 0) panic("Could not create BLE thread");
+
     setup_dummy_trap(SIGALRM);
-
-    if (pthread_create(&prom_thread, NULL, prom_routine, NULL) != 0)
-        panic("Could not create Prometheus thread");
-    if (pthread_create(&ble_thread, NULL, ble_routine, NULL) != 0)
-        panic("Could not create BLE thread");
-
     setup_interrupt_trapping(interrupt_all);
 
-    if (pthread_join(ble_thread, NULL) != 0)
-        panic("Could not join with BLE thread");
+    if (pthread_join(ble_thread, NULL) != 0) panic("Could not join with BLE thread");
     printf("BLE thread exited\n");
-    if (pthread_join(prom_thread, NULL) != 0)
-        panic("Could not join with Prometheus thread");
+    if (pthread_join(prom_thread, NULL) != 0) panic("Could not join with Prometheus thread");
     printf("Prom thread exited\n");
+
+    destory_device_list();
     exit(0);
 }

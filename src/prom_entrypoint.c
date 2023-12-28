@@ -8,8 +8,6 @@
 
 #include "interrupts.h"
 
-#define RECEIVE_BUFFER_SIZE 1024
-
 
 static const char *build_metrics_response(void) {
     return "HTTP/1.0 200 OK\n"
@@ -27,6 +25,8 @@ static void respond_with_404(const int client_fd) {
             "\n";
     send(client_fd, response, strlen(response), 0);
 }
+
+#define RECEIVE_BUFFER_SIZE 1024
 
 static void handle_incoming_request(const int client_fd) {
     char receive_buffer[RECEIVE_BUFFER_SIZE];
