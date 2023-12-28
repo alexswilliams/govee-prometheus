@@ -4,7 +4,9 @@ OBJECTS:= \
 	out/interrupts.o \
 	out/govee.o \
 	out/bluetooth_eir.o \
-	out/scan.o
+	out/scan.o \
+	out/bluetooth_entrypoint.o \
+	out/prom_entrypoint.o
 BINARY:=bin/monitor
 
 .PHONY: clean all

@@ -1,6 +1,5 @@
 #include "bluetooth_eir.h"
 
-#include <stdlib.h>
 #include <string.h>
 #include <asm-generic/errno-base.h>
 
@@ -36,7 +35,6 @@ static const eir_structure *find_first_eir_structure(const uint8_t *const eir, c
 #define EIR_NAME_SHORT 0x08
 #define EIR_NAME_COMPLETE 0x09
 #define EIR_MANUFACTURER_DATA 0xff
-
 
 int read_flags_from_eir(const uint8_t *const eir, const size_t eir_size, uint8_t *const ret_flags) {
     const eir_structure *flags_structure = find_first_eir_structure(eir, eir_size, EIR_FLAGS);

@@ -1,6 +1,7 @@
+#include "interrupts.h"
+
 #include <stdlib.h>
 #include <signal.h>
-#include "interrupts.h"
 
 static int __trapped_signal = 0;
 
