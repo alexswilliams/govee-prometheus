@@ -28,7 +28,7 @@ static void dump_packet(const uint8_t *const buf, const size_t size) {
         ptr += 3;
     }
     ptr[0] = 0;
-    puts(hex);
+    fputs(hex, stderr);
 }
 
 static void receive_events(const int device_handle, const void (*handle_matching_event)(const le_advertising_info *)) {
@@ -48,6 +48,7 @@ static void receive_events(const int device_handle, const void (*handle_matching
         if (length_read < HCI_EVENT_HDR_SIZE + EVT_LE_META_EVENT_SIZE) {
             fprintf(stderr, "Received event that was too short to be an LE Event: %ld bytes", length_read);
             dump_packet(buf, length_read);
+            fflush(stderr);
             continue;
         }
 
@@ -55,6 +56,7 @@ static void receive_events(const int device_handle, const void (*handle_matching
             || ((evt_le_meta_event *) (buf + HCI_EVENT_HDR_SIZE + 1))->subevent != EVT_LE_ADVERTISING_REPORT) {
             fprintf(stderr, "Received BLE message that wasn't an EVENT packet or a advertising report: ");
             dump_packet(buf, length_read);
+            fflush(stderr);
             continue;
         }
 

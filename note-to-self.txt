@@ -1,0 +1,10 @@
+Most successful commandline so far:
+sudo podman run \
+  --net=host \
+  --cap-add NET_RAW \
+  --security-opt apparmor=unconfined \
+  --rm localhost/alexswilliams/govee-prom:latest
+
+sudo needed to run setsockopt on HCI sockets
+NET_RAW allows opening HCI sockets and enumerating the available interfaces
+apparmor was getting in the way of propagating the SIGINT to children, podman was disowning the children and leaving them orphaned

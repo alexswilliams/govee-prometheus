@@ -25,6 +25,7 @@ static void *prom_routine(void *args) {
 
 static void panic(const char *const string) {
     perror(string);
+    fflush(stderr);
     exit(1);
 }
 
@@ -45,8 +46,10 @@ int main(void) {
 
     if (pthread_join(ble_thread, NULL) != 0) panic("Could not join with BLE thread");
     printf("BLE thread exited\n");
+    fflush(stdout);
     if (pthread_join(prom_thread, NULL) != 0) panic("Could not join with Prometheus thread");
     printf("Prom thread exited\n");
+    fflush(stdout);
 
     destory_device_list();
     exit(0);

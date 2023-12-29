@@ -51,10 +51,12 @@ void handle_govee_event_advertising_packet(const le_advertising_info *const info
     const meta_manufacturer_payload *const meta_payload = read_manufacturer_data_from_eir(info->data, info->length);
     if (meta_payload == NULL) {
         fprintf(stderr, "Could not read manufacturer data from payload\n");
+        fflush(stderr);
         return;
     }
     if (btohs(meta_payload->company_id) != GOVEE_COMPANY_ID) {
-        printf("Non-Govee Device: %s (%s)\n", address, name);
+        fprintf(stderr, "Non-Govee Device: %s (%s)\n", address, name);
+        fflush(stderr);
         return;
     }
 
@@ -66,4 +68,5 @@ void handle_govee_event_advertising_packet(const le_advertising_info *const info
         "Error: %d, Battery: %d%%; Temp: %4.1f°C; Humidity: %4.1f%%, MAC: %s, Name: %s, Device: %s\n",
         result.has_error, result.battery_percent, result.temperature,
         result.humidity, address, name, device_from_address(address));
+    fflush(stdout);
 }

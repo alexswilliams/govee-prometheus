@@ -53,7 +53,8 @@ static void handle_incoming_request(const int client_fd) {
         return;
     }
     if (strncmp(receive_buffer, "GET /metrics HTTP/1", 19) != 0) {
-        printf("Invalid request received: \n%s\n", receive_buffer);
+        fprintf(stderr, "Invalid request received: \n%s\n", receive_buffer);
+        fflush(stderr);
         respond_with_404(client_fd);
         return;
     }
