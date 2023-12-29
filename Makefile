@@ -23,5 +23,6 @@ out/%.o: src/%.c $(wildcard src/*.h)
 
 $(BINARY): $(OBJECTS)
 	gcc $^ \
-		-lbluetooth -lpthread \
+		-static \
+		-l:libbluetooth.a -lpthread \
 		-o $@
