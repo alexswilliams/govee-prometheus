@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include <ctype.h>
 #include <inttypes.h>
 #include <stdint.h>
@@ -56,6 +58,18 @@ static int parse_to_ushort(const char *const string, uint16_t *const dest) {
     return 0;
 }
 
+const char *alias_from_address_or_null(const char *const address) {
+    for (const device_alias_item *dev = config.aliases; dev != NULL; dev = dev->next)
+        if (strcasecmp(address, dev->address) == 0) return dev->alias;
+    return NULL;
+}
+
+static const char *find_alias_or_null(const char *const alias) {
+    for (const device_alias_item *dev = config.aliases; dev != NULL; dev = dev->next)
+        if (strcasecmp(alias, dev->alias) == 0) return dev->alias;
+    return NULL;
+}
+
 #define ALIAS_FILE_MAX_LINE_LENGTH 255
 
 static int load_aliases(const char *const env_aliases_file) {
@@ -112,6 +126,15 @@ static int load_aliases(const char *const env_aliases_file) {
         device_alias_item *alias_entry = malloc(sizeof(device_alias_item));
         alias_entry->address = strndup(addr_start, addr_end - addr_start);
         alias_entry->alias = strndup(alias_start, alias_end - alias_start);
+        if (alias_from_address_or_null(alias_entry->address) != NULL
+            || find_alias_or_null(alias_entry->alias) != NULL) {
+            fprintf(stderr, "Alias file line %d: Duplicate entry: %s\n", line_num, line);
+            free(alias_entry->address);
+            free(alias_entry->alias);
+            free(alias_entry);
+            goto invalid_file;
+        }
+
         alias_entry->next = config.aliases;
         config.aliases = alias_entry;
     }
@@ -204,13 +227,6 @@ int populate_config() {
     }
     fflush(stderr);
     return 0;
-}
-
-const char *alias_from_address_or_null(const char *const address) {
-    for (const device_alias_item *dev = config.aliases; dev != NULL; dev = dev->next) {
-        if (strcasecmp(address, dev->address) == 0) return dev->alias;
-    }
-    return NULL;
 }
 
 void destroy_config() {
