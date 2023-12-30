@@ -7,6 +7,7 @@
 #include <bluetooth/hci.h>
 
 #include "bluetooth_eir.h"
+#include "config.h"
 #include "device_list.h"
 
 
@@ -31,15 +32,6 @@ static void interpret_payload(const govee_payload *const data, sensor_data *cons
     out->humidity = (word & 0x7fffff) % 1000 / 10.0f;
 }
 
-static const char *device_from_address(const char *const address) {
-    if (strcmp(address, "A4:C1:38:BC:EE:53") == 0) return "Fridge";
-    if (strcmp(address, "A4:C1:38:43:97:32") == 0) return "Bedroom";
-    if (strcmp(address, "A4:C1:38:58:2A:4B") == 0) return "Bathroom";
-    if (strcmp(address, "A4:C1:38:C7:EF:61") == 0) return "Kitchen";
-    if (strcmp(address, "A4:C1:38:38:2D:72") == 0) return "Office";
-    return "Unknown";
-}
-
 static void now_as_string(char *const buf, const size_t buf_size) {
     struct timespec tp;
     struct tm tm;
@@ -53,6 +45,7 @@ void handle_govee_event_advertising_packet(const le_advertising_info *const info
     char address[18] = {0};
     char name[30] = {0};
     ba2str(&info->bdaddr, address);
+    const char *const alias = alias_from_address_or_null(address);
     if (read_name_from_eir(info->data, info->length, name, sizeof(name) - 1) < 0)
         strcpy(name, "(unknown)");
 
@@ -71,13 +64,13 @@ void handle_govee_event_advertising_packet(const le_advertising_info *const info
     const govee_payload *const payload = (govee_payload *) meta_payload->data;
     sensor_data result;
     interpret_payload(payload, &result);
-    add_or_update_sensor_by_address(address, name, device_from_address(address), &result);
+    add_or_update_sensor_by_address(address, name, alias == NULL ? "Unknown" : alias, &result);
 
     char time_string[22] = {0};
     now_as_string(time_string, sizeof(time_string));
     printf(
         "%s: Error: %d, Battery: %d%%; Temp: %4.1f°C; Humidity: %4.1f%%, MAC: %s, Name: %s, Device: %s\n",
         time_string, result.has_error, result.battery_percent, result.temperature,
-        result.humidity, address, name, device_from_address(address));
+        result.humidity, address, name, alias == NULL ? "Unknown" : alias);
     fflush(stdout);
 }

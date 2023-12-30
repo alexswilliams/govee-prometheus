@@ -165,3 +165,10 @@ int populate_config() {
     fflush(stderr);
     return 0;
 }
+
+const char *alias_from_address_or_null(const char *const address) {
+    for (const device_alias_item *dev = config.aliases; dev != NULL; dev = dev->next) {
+        if (strcasecmp(address, dev->address) == 0) return dev->alias;
+    }
+    return NULL;
+}
