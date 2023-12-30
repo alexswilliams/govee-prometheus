@@ -32,7 +32,7 @@ jobs:
       - name: Build and Push
         uses: docker/build-push-action@v5
         with:
-          file: ./build/package/Dockerfile
+          file: ./Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64/v8
           tags: "alexswilliams/govee-prometheus:${{ github.ref_name }}--${{ steps.params.outputs.date }}--${{ steps.params.outputs.shortRef }}"
