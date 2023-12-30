@@ -56,8 +56,10 @@ void handle_govee_event_advertising_packet(const le_advertising_info *const info
         return;
     }
     if (btohs(meta_payload->company_id) != GOVEE_COMPANY_ID) {
-        fprintf(stderr, "Non-Govee Device: %s (%s)\n", address, name);
-        fflush(stderr);
+        if (cfg_is_verbose_enabled()) {
+            fprintf(stderr, "Non-Govee Device: %s (%s)\n", address, name);
+            fflush(stderr);
+        }
         return;
     }
 
@@ -66,12 +68,13 @@ void handle_govee_event_advertising_packet(const le_advertising_info *const info
     interpret_payload(payload, &result);
     add_or_update_sensor_by_address(address, name, alias == NULL ? "Unknown" : alias, &result);
 
-    if (!cfg_is_verbose_enabled()) return;
-    char time_string[22] = {0};
-    now_as_string(time_string, sizeof(time_string));
-    printf(
-        "%s: Error: %d, Battery: %d%%; Temp: %4.1f°C; Humidity: %4.1f%%, MAC: %s, Name: %s, Device: %s\n",
-        time_string, result.has_error, result.battery_percent, result.temperature,
-        result.humidity, address, name, alias == NULL ? "Unknown" : alias);
-    fflush(stdout);
+    if (cfg_is_verbose_enabled()) {
+        char time_string[22] = {0};
+        now_as_string(time_string, sizeof(time_string));
+        printf(
+            "%s: Error: %d, Battery: %d%%; Temp: %4.1f°C; Humidity: %4.1f%%, MAC: %s, Name: %s, Device: %s\n",
+            time_string, result.has_error, result.battery_percent, result.temperature,
+            result.humidity, address, name, alias == NULL ? "Unknown" : alias);
+        fflush(stdout);
+    }
 }

@@ -203,7 +203,7 @@ int populate_config() {
         return -1;
     }
 
-    const char *const env_aliases_file = getenv("BT_ALIASES");
+    const char *const env_aliases_file = getenv("BT_ALIASES_FILE_PATH");
     if (env_aliases_file != NULL) {
         if (load_aliases(env_aliases_file) != 0)
             return -1;

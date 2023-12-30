@@ -23,10 +23,10 @@ char *build_metrics() {
     char *buf = malloc(buf_size);
 
     char *str = "# HELP govee_has_error Error flag reported by the sensor - 0 or 1\n"
-                "# TYPE govee_has_error gauge\n";
+            "# TYPE govee_has_error gauge\n";
     write_expanding(&buf, offset, &buf_size, str, strlen(str));
     offset += strlen(str);
-    for (const device_list_entry *device = device_list_raw(); device != NULL; device = device->next) {
+    for_each_device(device) {
         const int length = asprintf(
             &str, "govee_has_error{address=\"%s\",name=\"%s\",alias=\"%s\"} %d %lu\n",
             device->address, device->name, device->alias, device->data.has_error, device->last_seen);
@@ -37,10 +37,10 @@ char *build_metrics() {
     }
 
     str = "# HELP govee_battery_level Battery level reported by the sensor - integer 0 to 99\n"
-          "# TYPE govee_battery_level gauge\n";
+            "# TYPE govee_battery_level gauge\n";
     write_expanding(&buf, offset, &buf_size, str, strlen(str));
     offset += strlen(str);
-    for (const device_list_entry *device = device_list_raw(); device != NULL; device = device->next) {
+    for_each_device(device) {
         const int length = asprintf(
             &str, "govee_battery_level{address=\"%s\",name=\"%s\",alias=\"%s\"} %d %lu\n",
             device->address, device->name, device->alias, device->data.battery_percent, device->last_seen);
@@ -51,10 +51,10 @@ char *build_metrics() {
     }
 
     str = "# HELP govee_temperature_celcius Temperature in Celcius to 1 decimal place - -99.9C to +99.9C\n"
-          "# TYPE govee_temperature_celcius gauge\n";
+            "# TYPE govee_temperature_celcius gauge\n";
     write_expanding(&buf, offset, &buf_size, str, strlen(str));
     offset += strlen(str);
-    for (const device_list_entry *device = device_list_raw(); device != NULL; device = device->next) {
+    for_each_device(device) {
         const int length = asprintf(
             &str, "govee_temperature_celcius{address=\"%s\",name=\"%s\",alias=\"%s\"} %.1f %lu\n",
             device->address, device->name, device->alias, device->data.temperature, device->last_seen);
@@ -65,10 +65,10 @@ char *build_metrics() {
     }
 
     str = "# HELP govee_humidity_percent Relative humidity, percentage to 1 decimal place - 0.0 to 99.9\n"
-          "# TYPE govee_humidity_percent gauge\n";
+            "# TYPE govee_humidity_percent gauge\n";
     write_expanding(&buf, offset, &buf_size, str, strlen(str));
     offset += strlen(str);
-    for (const device_list_entry *device = device_list_raw(); device != NULL; device = device->next) {
+    for_each_device(device) {
         const int length = asprintf(
             &str, "govee_humidity_percent{address=\"%s\",name=\"%s\",alias=\"%s\"} %.1f %lu\n",
             device->address, device->name, device->alias, device->data.humidity, device->last_seen);
@@ -78,11 +78,11 @@ char *build_metrics() {
         free(str);
     }
 
-    str = "# HELP govee_samples_counted Number of advertisements seen - always >= 1\n"
-          "# TYPE govee_samples_counted counter\n";
+    str = "# HELP govee_samples_counted Number of advertisements seen - integer >= 1\n"
+            "# TYPE govee_samples_counted counter\n";
     write_expanding(&buf, offset, &buf_size, str, strlen(str));
     offset += strlen(str);
-    for (const device_list_entry *device = device_list_raw(); device != NULL; device = device->next) {
+    for_each_device(device) {
         const int length = asprintf(
             &str, "govee_samples_counted{address=\"%s\",name=\"%s\",alias=\"%s\"} %lu %lu\n",
             device->address, device->name, device->alias, device->samples_counted, device->last_seen);

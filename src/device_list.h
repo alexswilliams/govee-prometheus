@@ -3,7 +3,7 @@
 #include "govee.h"
 
 typedef struct _device_list_entry {
-    struct _device_list_entry *next;
+    struct _device_list_entry *volatile next;
     sensor_data data;
     char *address;
     char *name;
@@ -12,7 +12,10 @@ typedef struct _device_list_entry {
     uint64_t samples_counted;
 } device_list_entry;
 
-device_list_entry *device_list_raw();
+device_list_entry *volatile device_list_raw();
+
+#define for_each_device(_dev) \
+    for (const device_list_entry *volatile _dev = device_list_raw(); _dev != NULL; _dev = _dev->next)
 
 void add_or_update_sensor_by_address(const char *address, const char *name, const char *alias, const sensor_data *data);
 
