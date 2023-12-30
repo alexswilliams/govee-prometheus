@@ -8,3 +8,6 @@ sudo podman run \
 sudo needed to run setsockopt on HCI sockets
 NET_RAW allows opening HCI sockets and enumerating the available interfaces
 apparmor was getting in the way of propagating the SIGINT to children, podman was disowning the children and leaving them orphaned
+
+To run locally:
+make && sudo BT_ALIASES=sample-devices.csv ./bin/monitor

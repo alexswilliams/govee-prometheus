@@ -1,14 +1,24 @@
+#include <ctype.h>
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+typedef struct _device_alias {
+    char *address;
+    char *alias;
+    struct _device_alias *next;
+} device_alias_item;
 
 static volatile struct config {
     uint16_t scan_interval;
     uint16_t scan_window;
+    device_alias_item *aliases;
 } config = {
     53,
-    17
+    17,
+    NULL
 };
 
 uint16_t cfg_scan_interval() {
@@ -26,6 +36,76 @@ static int parse_to_ushort(const char *const string, uint16_t *const dest) {
     if (number > 0xffff) return -1;
     *dest = number & 0xffff;
     return 0;
+}
+
+#define ALIAS_FILE_MAX_LINE_LENGTH 255
+
+static int load_aliases(const char *const env_aliases_file) {
+    FILE *const fd = fopen(env_aliases_file, "r");
+    if (fd == NULL) {
+        perror("Could not open aliases file");
+        return -1;
+    }
+    size_t buffer_size = ALIAS_FILE_MAX_LINE_LENGTH;
+    char *line = malloc(buffer_size);
+    int line_num = 1;
+    for (size_t read = getline(&line, &buffer_size, fd);
+         read != -1;
+         read = getline(&line, &buffer_size, fd), line_num++) {
+        if (read == 0) continue;
+
+        const char *ptr = line;
+        while (ptr[0] != '\0' && ptr[0] != '\n' && isblank(ptr[0])) ptr++; // skip blanks before address
+        if (ptr[0] == '\0' || ptr[0] == '\n') continue; // line was blank but not empty
+        const char *const addr_start = ptr;
+        while ((isxdigit(ptr[0]) || ptr[0] == ':') && ptr - addr_start < 17) ptr++;
+        if (ptr - addr_start != 17 || (!isblank(ptr[0]) && ptr[0] != ',')) {
+            fprintf(stderr, "Alias file line %d contained invalid address: %s\n", line_num, line);
+            goto invalid_file;
+        }
+        const char *const addr_end = ptr;
+        while (ptr[0] != '\0' && ptr[0] != '\n' && isblank(ptr[0])) ptr++; // skip blank space before comma
+        if (ptr[0] != ',') {
+            fprintf(stderr, "Alias file line %d: expected comma: %s\n", line_num, line);
+            goto invalid_file;
+        }
+        ptr++;
+        while (ptr[0] != '\0' && ptr[0] != '\n' && isblank(ptr[0])) ptr++; // skip blank space before alias
+        if (ptr[0] == '\0' || ptr[0] == '\n') {
+            fprintf(stderr, "Alias file line %d: Alias missing: %s\n", line_num, line);
+            goto invalid_file;
+        }
+        const char *const alias_start = ptr;
+        while (ptr[0] != '\0' && ptr[0] != '\n'
+               && !iscntrl(ptr[0])
+               && ptr[0] != '"' && ptr[0] != '\'' && ptr[0] != '\\')
+            ptr++;
+        if (ptr[0] != '\n' && ptr[0] != '\0') {
+            fprintf(stderr, "Alias file line %d: Alias contains disallowed characters: %s\n", line_num, line);
+            goto invalid_file;
+        }
+        while (isspace(ptr[-1]) && ptr > alias_start) ptr--; // reverse back over blank space after alias
+        const char *const alias_end = ptr;
+        if (alias_start == alias_end) {
+            fprintf(stderr, "Alias file line %d: Alias was 0-sized: %s\n", line_num, line);
+            goto invalid_file;
+        }
+
+        device_alias_item *alias_entry = malloc(sizeof(device_alias_item));
+        alias_entry->address = strndup(addr_start, addr_end - addr_start);
+        alias_entry->alias = strndup(alias_start, alias_end - alias_start);
+        alias_entry->next = config.aliases;
+        config.aliases = alias_entry;
+    }
+
+    if (line != NULL) free(line);
+    fclose(fd);
+    return 0;
+invalid_file:
+    fflush(stderr);
+    if (line != NULL) free(line);
+    fclose(fd);
+    return -1;
 }
 
 int populate_config() {
@@ -47,6 +127,7 @@ int populate_config() {
         }
         config.scan_window = result;
     }
+
     if (config.scan_interval < config.scan_window) {
         fprintf(stderr, "Interval (%d = %.2fms) must be at least as long as the window (%d = %.2fms)\n",
                 config.scan_interval, config.scan_interval * 0.625f, config.scan_window, config.scan_window * 0.625f);
@@ -63,12 +144,24 @@ int populate_config() {
         return -1;
     }
 
+    const char *const env_aliases_file = getenv("BT_ALIASES");
+    if (env_aliases_file != NULL) {
+        if (load_aliases(env_aliases_file) != 0)
+            return -1;
+    }
+
     fprintf(stderr, "Starting with config:\n"
             " • Scan interval: %d (%.3fms)\n"
             " • Scan window: %d (%.3fms)\n",
             config.scan_interval, config.scan_interval * 0.625f,
             config.scan_window, config.scan_window * 0.625f
     );
+    if (config.aliases != NULL) {
+        fprintf(stderr, "Known aliases:\n");
+        for (const device_alias_item *dev = config.aliases; dev != NULL; dev = dev->next) {
+            fprintf(stderr, " • [%s] -> [%s]\n", dev->address, dev->alias);
+        }
+    }
     fflush(stderr);
     return 0;
 }
