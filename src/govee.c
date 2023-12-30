@@ -28,7 +28,7 @@ static void interpret_payload(const govee_payload *const data, sensor_data *cons
     out->battery_percent = data->battery_level_and_error & 0x7f;
     const int word = govee_ntohl(data->data_word);
     const float temperature = (word & 0x7fffff) / 1000 / 10.0f;
-    out->temperature = word & 0x800000 ? -temperature : temperature;
+    out->temperature = (word & 0x7fffff) != 0 && word & 0x800000 ? -temperature : temperature;
     out->humidity = (word & 0x7fffff) % 1000 / 10.0f;
 }
 
