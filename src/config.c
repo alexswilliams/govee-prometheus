@@ -5,8 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define REMOVE_DUPLICATES 1
 #define KEEP_DUPLICATES 0
+#define REMOVE_DUPLICATES 1
+
+#define QUIET 0
+#define VERBOSE 1
 
 typedef struct _device_alias {
     char *address;
@@ -19,11 +22,13 @@ static volatile struct config {
     uint16_t scan_interval;
     uint16_t scan_window;
     device_alias_item *aliases;
+    int verbose;
 } config = {
-    REMOVE_DUPLICATES,
+    KEEP_DUPLICATES,
     53,
     17,
-    NULL
+    NULL,
+    QUIET
 };
 
 uint16_t cfg_scan_interval() {
@@ -36,6 +41,10 @@ uint16_t cfg_scan_window() {
 
 uint8_t cfg_ignore_duplicates() {
     return config.scan_ignore_duplicates;
+}
+
+int cfg_is_verbose_enabled() {
+    return config.verbose == VERBOSE;
 }
 
 static int parse_to_ushort(const char *const string, uint16_t *const dest) {
@@ -118,6 +127,15 @@ invalid_file:
 }
 
 int populate_config() {
+    const char *const env_verbose = getenv("VERBOSE");
+    if (env_verbose != NULL) {
+        if (strcasecmp(env_verbose, "true") || strcasecmp(env_verbose, "verbose")) {
+            config.verbose = VERBOSE;
+        } else {
+            config.verbose = QUIET;
+        }
+    }
+
     const char *const env_ignore_duplicates = getenv("BLE_IGNORE_DUPLICATES");
     if (env_ignore_duplicates != NULL) {
         if (strcasecmp(env_ignore_duplicates, "true")) {
@@ -169,9 +187,11 @@ int populate_config() {
     }
 
     fprintf(stderr, "Starting with config:\n"
+            " • Log output: %s\n"
             " • Duplicate messages: %s\n"
             " • Scan interval: %d (%.3fms)\n"
             " • Scan window: %d (%.3fms)\n",
+            config.verbose == VERBOSE ? "verbose" : "quiet",
             config.scan_ignore_duplicates == REMOVE_DUPLICATES ? "remove" : "keep",
             config.scan_interval, config.scan_interval * 0.625f,
             config.scan_window, config.scan_window * 0.625f
@@ -191,4 +211,16 @@ const char *alias_from_address_or_null(const char *const address) {
         if (strcasecmp(address, dev->address) == 0) return dev->alias;
     }
     return NULL;
+}
+
+void destroy_config() {
+    device_alias_item *this_node = config.aliases;
+    config.aliases = NULL;
+    while (this_node != NULL) {
+        device_alias_item *next_node = this_node->next;
+        free(this_node->address);
+        free(this_node->alias);
+        free(this_node);
+        this_node = next_node;
+    }
 }

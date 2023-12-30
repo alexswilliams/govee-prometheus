@@ -59,5 +59,6 @@ int main(void) {
     fflush(stdout);
 
     destory_device_list();
+    destroy_config();
     exit(0);
 }

@@ -36,6 +36,7 @@ static void add_new_sensor(const char *const address, const char *const name, co
     new_sensor->alias = strdup(alias);
     memcpy(&new_sensor->data, data, sizeof(new_sensor->data));
     new_sensor->last_seen = now();
+    new_sensor->samples_counted = 1;
     list = new_sensor;
 }
 
@@ -57,6 +58,7 @@ void add_or_update_sensor_by_address(const char *const address, const char *cons
         }
         memcpy(&existing_sensor->data, data, sizeof(existing_sensor->data));
         existing_sensor->last_seen = now();
+        existing_sensor->samples_counted++;
     }
 }
 
@@ -66,6 +68,9 @@ void destory_device_list() {
     list = NULL;
     while (this_node != NULL) {
         device_list_entry *next_node = this_node->next;
+        free(this_node->address);
+        free(this_node->alias);
+        free(this_node->name);
         free(this_node);
         this_node = next_node;
     }

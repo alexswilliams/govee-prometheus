@@ -9,6 +9,7 @@ typedef struct _device_list_entry {
     char *name;
     char *alias;
     uint64_t last_seen;
+    uint64_t samples_counted;
 } device_list_entry;
 
 device_list_entry *device_list_raw();
