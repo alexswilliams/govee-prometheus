@@ -81,7 +81,7 @@ static int load_aliases(const char *const env_aliases_file) {
     size_t buffer_size = ALIAS_FILE_MAX_LINE_LENGTH;
     char *line = malloc(buffer_size);
     int line_num = 1;
-    for (size_t read = getline(&line, &buffer_size, fd);
+    for (ssize_t read = getline(&line, &buffer_size, fd);
          read != -1;
          read = getline(&line, &buffer_size, fd), line_num++) {
         if (read == 0) continue;

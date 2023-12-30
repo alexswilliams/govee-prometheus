@@ -8,7 +8,7 @@
 
 #define BUF_SIZE 4096
 
-void write_expanding(char **buf, const int offset, size_t *const buf_size, const char *const str, const int length) {
+void write_expanding(char **buf, const int offset, size_t *const buf_size, const char *const str, const size_t length) {
     if (length > *buf_size - offset - 1) {
         while (length > *buf_size - offset - 1)
             *buf_size *= 2;

@@ -21,7 +21,7 @@ static int is_limited_mode(const le_advertising_info *const info) {
 static void dump_packet(const uint8_t *const buf, const size_t size) {
     char hex[size * 3 + 1];
     char *ptr = hex;
-    for (int i = 0; i < size; i++) {
+    for (unsigned int i = 0; i < size; i++) {
         ptr[0] = buf[i] >> 4 > 9 ? 'a' - 10 + (buf[i] >> 4) : '0' + (buf[i] >> 4);
         ptr[1] = (buf[i] & 0x0f) > 9 ? 'a' - 10 + (buf[i] & 0x0f) : '0' + (buf[i] & 0x0f);
         ptr[2] = ' ';

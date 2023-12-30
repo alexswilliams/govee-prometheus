@@ -48,7 +48,7 @@ int read_name_from_eir(const uint8_t *const eir, const size_t eir_reported_size,
     const eir_structure *name_structure = find_first_eir_structure(eir, eir_reported_size, EIR_NAME_COMPLETE);
     if (name_structure == NULL) name_structure = find_first_eir_structure(eir, eir_reported_size, EIR_NAME_SHORT);
     if (name_structure == NULL) return -ENOENT;
-    if (name_structure->length - 1 > buf_len) return -EINVAL;
+    if (name_structure->length - 1u > buf_len) return -EINVAL;
     memcpy(buf, name_structure->data, name_structure->length - 1);
     return 0;
 }
