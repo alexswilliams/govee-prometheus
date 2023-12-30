@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define REMOVE_DUPLICATES 1
+#define KEEP_DUPLICATES 0
+
 typedef struct _device_alias {
     char *address;
     char *alias;
@@ -12,10 +15,12 @@ typedef struct _device_alias {
 } device_alias_item;
 
 static volatile struct config {
+    uint8_t scan_ignore_duplicates;
     uint16_t scan_interval;
     uint16_t scan_window;
     device_alias_item *aliases;
 } config = {
+    REMOVE_DUPLICATES,
     53,
     17,
     NULL
@@ -27,6 +32,10 @@ uint16_t cfg_scan_interval() {
 
 uint16_t cfg_scan_window() {
     return config.scan_window;
+}
+
+uint8_t cfg_ignore_duplicates() {
+    return config.scan_ignore_duplicates;
 }
 
 static int parse_to_ushort(const char *const string, uint16_t *const dest) {
@@ -109,6 +118,15 @@ invalid_file:
 }
 
 int populate_config() {
+    const char *const env_ignore_duplicates = getenv("BLE_IGNORE_DUPLICATES");
+    if (env_ignore_duplicates != NULL) {
+        if (strcasecmp(env_ignore_duplicates, "true")) {
+            config.scan_ignore_duplicates = REMOVE_DUPLICATES;
+        } else {
+            config.scan_ignore_duplicates = KEEP_DUPLICATES;
+        }
+    }
+
     const char *const env_scan_interval = getenv("BLE_SCAN_INTERVAL");
     if (env_scan_interval != NULL) {
         uint16_t result;
@@ -151,8 +169,10 @@ int populate_config() {
     }
 
     fprintf(stderr, "Starting with config:\n"
+            " • Duplicate messages: %s\n"
             " • Scan interval: %d (%.3fms)\n"
             " • Scan window: %d (%.3fms)\n",
+            config.scan_ignore_duplicates == REMOVE_DUPLICATES ? "remove" : "keep",
             config.scan_interval, config.scan_interval * 0.625f,
             config.scan_window, config.scan_window * 0.625f
     );

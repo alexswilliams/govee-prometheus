@@ -15,8 +15,6 @@
 #define OWN_TYPE_RANDOM 1
 #define FILTER_POLICY_NONE 0
 #define FILTER_POLICY_ALLOW_LIST 1
-#define REMOVE_DUPLICATES 1
-#define KEEP_DUPLICATES 0
 
 void ble_thread_entrypoint() {
     const int device_id = hci_get_route(NULL);
@@ -34,7 +32,7 @@ void ble_thread_entrypoint() {
     fprintf(stderr, "Opened hci%d on fd %d\n", device_id, handle);
     fflush(stderr);
 
-    if (hci_le_set_scan_enable(handle, 0, REMOVE_DUPLICATES, DEFAULT_TIMEOUT) >= 0) {
+    if (hci_le_set_scan_enable(handle, 0, cfg_ignore_duplicates(), DEFAULT_TIMEOUT) >= 0) {
         fputs("Stopping previous scan...\n", stderr);
         fflush(stderr);
         // this isn't a failure case - this happens in case a previous copy of this program died with a scan running.
@@ -47,7 +45,7 @@ void ble_thread_entrypoint() {
         return;
     }
 
-    if (hci_le_set_scan_enable(handle, 1, REMOVE_DUPLICATES, DEFAULT_TIMEOUT) < 0) {
+    if (hci_le_set_scan_enable(handle, 1, cfg_ignore_duplicates(), DEFAULT_TIMEOUT) < 0) {
         perror("Could not begin LE scan");
         fflush(stderr);
         return;
@@ -57,7 +55,7 @@ void ble_thread_entrypoint() {
 
     fputs("\nStopping scan\n", stderr);
     fflush(stderr);
-    if (hci_le_set_scan_enable(handle, 0, REMOVE_DUPLICATES, DEFAULT_TIMEOUT) < 0) {
+    if (hci_le_set_scan_enable(handle, 0, cfg_ignore_duplicates(), DEFAULT_TIMEOUT) < 0) {
         perror("Could not end LE scan");
         fflush(stderr);
     }
