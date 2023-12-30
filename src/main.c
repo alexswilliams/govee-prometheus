@@ -4,6 +4,7 @@
 #include <signal.h>
 #include <bits/sigthread.h>
 
+#include "config.h"
 #include "device_list.h"
 #include "interrupts.h"
 
@@ -38,6 +39,12 @@ static void interrupt_all() {
 }
 
 int main(void) {
+    if (populate_config() != 0) {
+        fputs("Could not populate config\n", stderr);
+        fflush(stderr);
+        exit(1);
+    }
+
     if (pthread_create(&prom_thread, NULL, prom_routine, NULL) != 0) panic("Could not create Prometheus thread");
     if (pthread_create(&ble_thread, NULL, ble_routine, NULL) != 0) panic("Could not create BLE thread");
 

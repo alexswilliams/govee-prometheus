@@ -5,6 +5,7 @@
 
 #include "govee.h"
 #include "scan.h"
+#include "config.h"
 
 #define DEFAULT_TIMEOUT 1000
 
@@ -33,13 +34,13 @@ void ble_thread_entrypoint() {
     fprintf(stderr, "Opened hci%d on fd %d\n", device_id, handle);
     fflush(stderr);
 
-    // Stop any previous scan from running
     if (hci_le_set_scan_enable(handle, 0, REMOVE_DUPLICATES, DEFAULT_TIMEOUT) >= 0) {
         fputs("Stopping previous scan...\n", stderr);
         fflush(stderr);
+        // this isn't a failure case - this happens in case a previous copy of this program died with a scan running.
     }
 
-    if (hci_le_set_scan_parameters(handle, SCAN_TYPE_PASSIVE, htobs(23), htobs(5),
+    if (hci_le_set_scan_parameters(handle, SCAN_TYPE_PASSIVE, htobs(cfg_scan_interval()), htobs(cfg_scan_window()),
                                    OWN_TYPE_RANDOM,FILTER_POLICY_NONE, DEFAULT_TIMEOUT) < 0) {
         perror("Could not set scan params");
         fflush(stderr);

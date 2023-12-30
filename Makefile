@@ -8,7 +8,8 @@ OBJECTS:= \
 	out/bluetooth_entrypoint.o \
 	out/prom_entrypoint.o \
 	out/device_list.o \
-	out/metrics.o
+	out/metrics.o \
+	out/config.o
 BINARY:=bin/monitor
 
 .PHONY: clean all
