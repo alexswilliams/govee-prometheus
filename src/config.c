@@ -152,7 +152,7 @@ invalid_file:
 int populate_config() {
     const char *const env_verbose = getenv("VERBOSE");
     if (env_verbose != NULL) {
-        if (strcasecmp(env_verbose, "true") || strcasecmp(env_verbose, "verbose")) {
+        if (strcasecmp(env_verbose, "true") == 0 || strcasecmp(env_verbose, "verbose") == 0) {
             config.verbose = VERBOSE;
         } else {
             config.verbose = QUIET;
@@ -161,7 +161,7 @@ int populate_config() {
 
     const char *const env_ignore_duplicates = getenv("BLE_IGNORE_DUPLICATES");
     if (env_ignore_duplicates != NULL) {
-        if (strcasecmp(env_ignore_duplicates, "true")) {
+        if (strcasecmp(env_ignore_duplicates, "true") == 0) {
             config.scan_ignore_duplicates = REMOVE_DUPLICATES;
         } else {
             config.scan_ignore_duplicates = KEEP_DUPLICATES;
