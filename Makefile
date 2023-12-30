@@ -1,4 +1,4 @@
-CFLAGS=-Os -Wall -Wextra -Wno-ignored-qualifiers
+CFLAGS=-Os -Wall -Wextra
 OBJECTS:= \
 	out/main.o \
 	out/interrupts.o \

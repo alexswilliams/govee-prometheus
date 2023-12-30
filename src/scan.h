@@ -4,5 +4,5 @@
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 
-void receive_event_loop(int device_handle, const void (*handle_matching_event)(const le_advertising_info *));
+void receive_event_loop(int device_handle, void (*handle_matching_event)(const le_advertising_info *));
 #endif // SCAN_H

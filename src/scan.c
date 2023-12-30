@@ -31,7 +31,7 @@ static void dump_packet(const uint8_t *const buf, const size_t size) {
     fputs(hex, stderr);
 }
 
-static void receive_events(const int device_handle, const void (*handle_matching_event)(const le_advertising_info *)) {
+static void receive_events(const int device_handle, void (*const handle_matching_event)(const le_advertising_info *)) {
     while (!exit_requested()) {
         uint8_t buf[HCI_MAX_EVENT_SIZE];
         ssize_t length_read;
@@ -69,7 +69,7 @@ static void receive_events(const int device_handle, const void (*handle_matching
     }
 }
 
-void receive_event_loop(const int device_handle, const void (*handle_matching_event)(const le_advertising_info *)) {
+void receive_event_loop(const int device_handle, void (*handle_matching_event)(const le_advertising_info *)) {
     struct hci_filter old_filter;
     socklen_t old_filter_length = sizeof(old_filter);
     if (getsockopt(device_handle, SOL_HCI, HCI_FILTER, &old_filter, &old_filter_length) < 0) {

@@ -12,13 +12,13 @@ void ble_thread_entrypoint();
 
 void prom_thread_entrypoint();
 
-static void *ble_routine(void *args) {
+static void *ble_routine(__attribute_maybe_unused__ void *args) {
     ble_thread_entrypoint();
     signal_exit_needed();
     pthread_exit(NULL);
 }
 
-static void *prom_routine(void *args) {
+static void *prom_routine(__attribute_maybe_unused__ void *args) {
     prom_thread_entrypoint();
     signal_exit_needed();
     pthread_exit(NULL);

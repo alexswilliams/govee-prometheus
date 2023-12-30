@@ -6,9 +6,11 @@
 #include "govee.h"
 
 // Everything in this linked list is shared between the two worker threads - one writer and one reader.
+// Volatile as it must not be optimised out; but no real bother about atomicity - assuming word-length writes are
+// atomic it will always be updated in a way that preserves a sensible list.
 static device_list_entry *volatile list = NULL;
 
-device_list_entry *volatile device_list_raw() {
+device_list_entry *device_list_raw() {
     return list;
 }
 
@@ -19,7 +21,7 @@ static uint64_t now() {
 }
 
 static device_list_entry *find_sensor_by_address(const char *const address) {
-    for (device_list_entry *volatile node = list; node != NULL; node = node->next) {
+    for (device_list_entry *node = list; node != NULL; node = node->next) {
         const int comparison = strcmp(address, node->address);
         if (comparison == 0) return node;
         if (comparison < 0) return NULL;
@@ -70,7 +72,7 @@ void destory_device_list() {
     device_list_entry *this_node = list;
     list = NULL;
     while (this_node != NULL) {
-        device_list_entry *volatile next_node = this_node->next;
+        device_list_entry *next_node = this_node->next;
         free(this_node->address);
         free(this_node->alias);
         free(this_node->name);
