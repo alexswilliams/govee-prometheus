@@ -33,8 +33,8 @@ char *build_metrics() {
     const device_list_entry *device = device_list_raw();
     while (device != NULL) {
         length = asprintf(
-            &str, "has_error{address=\"%s\",name=\"%s\",alias=\"%s\"} %d %lu\n", device->address, device->name,
-            "unknown", device->data.has_error, device->last_seen);
+            &str, "has_error{address=\"%s\",name=\"%s\",alias=\"%s\"} %d %lu\n",
+            device->address, device->name, device->alias, device->data.has_error, device->last_seen);
         if (length == -1) {
             free(buf);
             return NULL;
@@ -44,8 +44,8 @@ char *build_metrics() {
         free(str);
 
         length = asprintf(
-            &str, "battery_level{address=\"%s\",name=\"%s\",alias=\"%s\"} %d %lu\n", device->address, device->name,
-            "unknown", device->data.battery_percent, device->last_seen);
+            &str, "battery_level{address=\"%s\",name=\"%s\",alias=\"%s\"} %d %lu\n",
+            device->address, device->name, device->alias, device->data.battery_percent, device->last_seen);
         if (length == -1) {
             free(buf);
             return NULL;
@@ -55,8 +55,8 @@ char *build_metrics() {
         free(str);
 
         length = asprintf(
-            &str, "temperature_celcius{address=\"%s\",name=\"%s\",alias=\"%s\"} %.1f %lu\n", device->address,
-            device->name, "unknown", device->data.temperature, device->last_seen);
+            &str, "temperature_celcius{address=\"%s\",name=\"%s\",alias=\"%s\"} %.1f %lu\n",
+            device->address, device->name, device->alias, device->data.temperature, device->last_seen);
         if (length == -1) {
             free(buf);
             return NULL;
@@ -66,8 +66,8 @@ char *build_metrics() {
         free(str);
 
         length = asprintf(
-            &str, "humidity_percent{address=\"%s\",name=\"%s\",alias=\"%s\"} %.1f %lu\n", device->address, device->name,
-            "unknown", device->data.humidity, device->last_seen);
+            &str, "humidity_percent{address=\"%s\",name=\"%s\",alias=\"%s\"} %.1f %lu\n",
+            device->address, device->name, device->alias, device->data.humidity, device->last_seen);
         if (length == -1) {
             free(buf);
             return NULL;

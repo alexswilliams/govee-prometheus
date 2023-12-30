@@ -7,12 +7,13 @@ typedef struct _device_list_entry {
     sensor_data data;
     char *address;
     char *name;
+    char *alias;
     uint64_t last_seen;
 } device_list_entry;
 
 device_list_entry *device_list_raw();
 
-void add_or_update_sensor_by_address(const char *address, const char *name, const sensor_data *data);
+void add_or_update_sensor_by_address(const char *address, const char *name, const char *alias, const sensor_data *data);
 
 void destory_device_list();
 #endif // DEVICE_LIST_H

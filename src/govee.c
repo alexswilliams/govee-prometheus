@@ -71,7 +71,7 @@ void handle_govee_event_advertising_packet(const le_advertising_info *const info
     const govee_payload *const payload = (govee_payload *) meta_payload->data;
     sensor_data result;
     interpret_payload(payload, &result);
-    add_or_update_sensor_by_address(address, name, &result);
+    add_or_update_sensor_by_address(address, name, device_from_address(address), &result);
 
     char time_string[22] = {0};
     now_as_string(time_string, sizeof(time_string));
