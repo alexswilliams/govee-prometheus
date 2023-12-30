@@ -2,6 +2,7 @@
 
 #include <byteswap.h>
 #include <stdio.h>
+#include <time.h>
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 
@@ -39,6 +40,13 @@ static const char *device_from_address(const char *const address) {
     return "Unknown";
 }
 
+static void now_as_string(char *const buf, const size_t buf_size) {
+    struct timespec tp;
+    struct tm tm;
+    clock_gettime(CLOCK_REALTIME, &tp);
+    strftime(buf, buf_size, "%Y-%m-%d %H:%M:%S", gmtime_r(&tp.tv_sec, &tm));
+}
+
 #define GOVEE_COMPANY_ID 60552
 
 void handle_govee_event_advertising_packet(const le_advertising_info *const info) {
@@ -64,9 +72,12 @@ void handle_govee_event_advertising_packet(const le_advertising_info *const info
     sensor_data result;
     interpret_payload(payload, &result);
     add_or_update_sensor_by_address(address, name, &result);
+
+    char time_string[22] = {0};
+    now_as_string(time_string, sizeof(time_string));
     printf(
-        "Error: %d, Battery: %d%%; Temp: %4.1f°C; Humidity: %4.1f%%, MAC: %s, Name: %s, Device: %s\n",
-        result.has_error, result.battery_percent, result.temperature,
+        "%s: Error: %d, Battery: %d%%; Temp: %4.1f°C; Humidity: %4.1f%%, MAC: %s, Name: %s, Device: %s\n",
+        time_string, result.has_error, result.battery_percent, result.temperature,
         result.humidity, address, name, device_from_address(address));
     fflush(stdout);
 }
