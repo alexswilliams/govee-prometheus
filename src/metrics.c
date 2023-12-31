@@ -50,13 +50,13 @@ char *build_metrics() {
         free(str);
     }
 
-    str = "# HELP govee_temperature_celcius Temperature in Celcius to 1 decimal place - -99.9C to +99.9C\n"
-            "# TYPE govee_temperature_celcius gauge\n";
+    str = "# HELP govee_temperature_celsius Temperature in Celsius to 1 decimal place - -99.9C to +99.9C\n"
+            "# TYPE govee_temperature_celsius gauge\n";
     write_expanding(&buf, offset, &buf_size, str, strlen(str));
     offset += strlen(str);
     for_each_device(device) {
         const int length = asprintf(
-            &str, "govee_temperature_celcius{address=\"%s\",name=\"%s\",alias=\"%s\"} %.1f %lu\n",
+            &str, "govee_temperature_celsius{address=\"%s\",name=\"%s\",alias=\"%s\"} %.1f %lu\n",
             device->address, device->name, device->alias, device->data.temperature, device->last_seen);
         if (length == -1) goto failure;
         write_expanding(&buf, offset, &buf_size, str, length);
