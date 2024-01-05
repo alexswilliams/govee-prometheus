@@ -1,4 +1,4 @@
-CFLAGS=-Os -Wall -Wextra -g
+CFLAGS=-Wall -Wextra -g
 OBJECTS:= \
 	out/main.o \
 	out/interrupts.o \

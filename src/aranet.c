@@ -70,9 +70,11 @@ void handle_aranet_event_advertising_packet(const le_advertising_info *const inf
     } else aranet_single_item.name = strdup(name);
     if (aranet_single_item.alias != NULL) {
         char *old = aranet_single_item.alias;
-        aranet_single_item.alias = strdup(alias);
+        if (alias != NULL) aranet_single_item.alias = strdup(alias);
+        else aranet_single_item.alias = "(unknwon)";
         free(old);
-    } else aranet_single_item.alias = strdup(alias);
+    } else if (alias != NULL) aranet_single_item.alias = strdup(alias);
+    else aranet_single_item.alias = "(unknown)";
 
 
     if (cfg_is_verbose_enabled()) {
