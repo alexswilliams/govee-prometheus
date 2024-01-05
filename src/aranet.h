@@ -34,13 +34,9 @@ typedef struct {
     uint8_t __unknown4; // 23
 } __attribute__((packed)) aranet_data;
 
-inline float get_temperature(const aranet_data *data) {
-    return data->temperature / 20.0;
-}
+float get_aranet_temperature(const aranet_data *data);
 
-inline float get_pressure(const aranet_data *data) {
-    return data->pressure / 10.0;
-}
+float get_aranet_pressure(const aranet_data *data);
 
 void handle_aranet_event_advertising_packet(const le_advertising_info *info);
 

@@ -115,7 +115,7 @@ char *build_metrics() {
     for_each_aranet_device(device) {
         const int length = asprintf(
             &str, "aranet_temperature_celsius{address=\"%s\",name=\"%s\",alias=\"%s\"} %.1f %lu\n",
-            device->address, device->name, device->alias, get_temperature(&device->data), device->last_seen);
+            device->address, device->name, device->alias, get_aranet_temperature(&device->data), device->last_seen);
         if (length == -1) goto failure;
         write_expanding(&buf, offset, &buf_size, str, length);
         offset += length;
@@ -129,7 +129,7 @@ char *build_metrics() {
     for_each_aranet_device(device) {
         const int length = asprintf(
             &str, "aranet_pressure_hpa{address=\"%s\",name=\"%s\",alias=\"%s\"} %.1f %lu\n",
-            device->address, device->name, device->alias, get_pressure(&device->data), device->last_seen);
+            device->address, device->name, device->alias, get_aranet_pressure(&device->data), device->last_seen);
         if (length == -1) goto failure;
         write_expanding(&buf, offset, &buf_size, str, length);
         offset += length;

@@ -21,6 +21,14 @@ aranet_device_list_entry *aranet_raw() {
     return &aranet_single_item;
 }
 
+float get_aranet_temperature(const aranet_data *data) {
+    return data->temperature / 20.0;
+}
+
+float get_aranet_pressure(const aranet_data *data) {
+    return data->pressure / 10.0;
+}
+
 static void now_as_string(char *const buf, const size_t buf_size) {
     struct timespec tp;
     struct tm tm;
@@ -83,8 +91,8 @@ void handle_aranet_event_advertising_packet(const le_advertising_info *const inf
         printf(
             "%s: ARANET DEVICE - MAC: %s, Name: %s, Device: %s, T: %.2f°C, H: %d%%, P: %.1f hPa, bat: %d%%, CO2: %d ppm\n",
             time_string, address, name, alias == NULL ? "Unknown" : alias,
-            get_temperature(&aranet_single_item.data), aranet_single_item.data.humidity,
-            get_pressure(&aranet_single_item.data), aranet_single_item.data.battery,
+            get_aranet_temperature(&aranet_single_item.data), aranet_single_item.data.humidity,
+            get_aranet_pressure(&aranet_single_item.data), aranet_single_item.data.battery,
             aranet_single_item.data.co2);
         fflush(stdout);
     }
