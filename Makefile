@@ -1,4 +1,4 @@
-CFLAGS=-Os -Wall -Wextra
+CFLAGS=-Os -Wall -Wextra -g
 OBJECTS:= \
 	out/main.o \
 	out/interrupts.o \
@@ -24,7 +24,7 @@ out/%.o: src/%.c $(wildcard src/*.h)
 	gcc -c $(CFLAGS) -o $@ $<
 
 $(BINARY): $(OBJECTS)
-	gcc $^ \
+	gcc -g $^ \
 		-static \
 		-l:libbluetooth.a -lpthread \
 		-o $@
