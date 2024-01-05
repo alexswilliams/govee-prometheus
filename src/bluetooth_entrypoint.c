@@ -3,6 +3,7 @@
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
 
+#include "aranet.h"
 #include "govee.h"
 #include "scan.h"
 #include "config.h"
@@ -51,7 +52,12 @@ void ble_thread_entrypoint() {
         return;
     }
 
-    receive_event_loop(handle, handle_govee_event_advertising_packet);
+    void (*event_handlers[])(const le_advertising_info *) = {
+        handle_govee_event_advertising_packet,
+        handle_aranet_event_advertising_packet,
+        NULL
+    };
+    receive_event_loop(handle, event_handlers);
 
     fputs("\nStopping scan\n", stderr);
     fflush(stderr);

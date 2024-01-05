@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "device_list.h"
+#include "govee_device_list.h"
 
 #define BUF_SIZE 4096
 

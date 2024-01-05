@@ -1,4 +1,4 @@
-#include "device_list.h"
+#include "govee_device_list.h"
 
 #include <stdlib.h>
 #include <time.h>
@@ -10,7 +10,7 @@
 // atomic it will always be updated in a way that preserves a sensible list.
 static device_list_entry *volatile list = NULL;
 
-device_list_entry *device_list_raw() {
+device_list_entry *govee_device_list_raw() {
     return list;
 }
 
@@ -45,8 +45,8 @@ static void add_new_sensor(const char *const address, const char *const name, co
     *node_ptr = new_sensor;
 }
 
-void add_or_update_sensor_by_address(const char *const address, const char *const name, const char *const alias,
-                                     const sensor_data *const data) {
+void add_or_update_govee_sensor_by_address(const char *const address, const char *const name, const char *const alias,
+                                           const sensor_data *const data) {
     device_list_entry *const existing_sensor = find_sensor_by_address(address);
     if (existing_sensor == NULL) {
         add_new_sensor(address, name, alias, data);
@@ -68,7 +68,7 @@ void add_or_update_sensor_by_address(const char *const address, const char *cons
 }
 
 
-void destory_device_list() {
+void destory_govee_device_list() {
     device_list_entry *this_node = list;
     list = NULL;
     while (this_node != NULL) {

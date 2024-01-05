@@ -5,7 +5,7 @@
 #include <bits/sigthread.h>
 
 #include "config.h"
-#include "device_list.h"
+#include "govee_device_list.h"
 #include "interrupts.h"
 
 void ble_thread_entrypoint();
@@ -58,7 +58,7 @@ int main(void) {
     printf("Prom thread exited\n");
     fflush(stdout);
 
-    destory_device_list();
+    destory_govee_device_list();
     destroy_config();
     exit(0);
 }

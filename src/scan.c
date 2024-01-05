@@ -10,11 +10,12 @@
 #include "interrupts.h"
 
 #define FLAGS_LIMITED_MODE_BIT 0x01
+#define FLAGS_GENERAL_MODE_BIT 0x02
 
-static int is_limited_mode(const le_advertising_info *const info) {
+static int is_general_discovery_mode(const le_advertising_info *const info) {
     uint8_t flags;
     if (read_flags_from_eir(info->data, info->length, &flags) < 0) return 0;
-    if (flags & FLAGS_LIMITED_MODE_BIT) return 1;
+    if (flags & (FLAGS_LIMITED_MODE_BIT | FLAGS_GENERAL_MODE_BIT)) return 1;
     return 0;
 }
 
@@ -31,7 +32,7 @@ static void dump_packet(const uint8_t *const buf, const size_t size) {
     fputs(hex, stderr);
 }
 
-static void receive_events(const int device_handle, void (*const handle_matching_event)(const le_advertising_info *)) {
+static void receive_events(const int device_handle, void (**const event_handlers)(const le_advertising_info *)) {
     while (!exit_requested()) {
         uint8_t buf[HCI_MAX_EVENT_SIZE];
         ssize_t length_read;
@@ -63,13 +64,17 @@ static void receive_events(const int device_handle, void (*const handle_matching
         const le_advertising_info *const advertising_info =
                 (le_advertising_info *) (((evt_le_meta_event *) (buf + HCI_EVENT_HDR_SIZE + 1))->data + 1);
 
-        if (!is_limited_mode(advertising_info)) continue;
+        if (!is_general_discovery_mode(advertising_info)) continue;
 
-        handle_matching_event(advertising_info);
+        int handler = 0;
+        while (event_handlers[handler] != NULL) {
+            event_handlers[handler](advertising_info);
+            handler++;
+        }
     }
 }
 
-void receive_event_loop(const int device_handle, void (*handle_matching_event)(const le_advertising_info *)) {
+void receive_event_loop(const int device_handle, void (**event_handlers)(const le_advertising_info *)) {
     struct hci_filter old_filter;
     socklen_t old_filter_length = sizeof(old_filter);
     if (getsockopt(device_handle, SOL_HCI, HCI_FILTER, &old_filter, &old_filter_length) < 0) {
@@ -87,7 +92,7 @@ void receive_event_loop(const int device_handle, void (*handle_matching_event)(c
         return;
     }
 
-    receive_events(device_handle, handle_matching_event);
+    receive_events(device_handle, event_handlers);
 
     if (setsockopt(device_handle, SOL_HCI, HCI_FILTER, &old_filter, sizeof(old_filter)) < 0)
         perror("Warning: could not restore old filter on HCI device");
