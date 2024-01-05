@@ -8,7 +8,7 @@
 
 // e.g. 210e0401000c0f010704860196263721023c002c0023
 
-typedef struct AranetData {
+typedef struct {
     uint8_t disconnected: 1, // 21
             __unknown1: 1,
             calib_state: 2,
@@ -43,5 +43,20 @@ inline float get_pressure(const aranet_data *data) {
 }
 
 void handle_aranet_event_advertising_packet(const le_advertising_info *info);
+
+typedef struct _aranet_device_list_entry {
+    struct _aranet_device_list_entry *next;
+    aranet_data data;
+    char *address;
+    char *name;
+    char *alias;
+    uint64_t last_seen;
+    uint64_t samples_counted;
+} aranet_device_list_entry;
+
+aranet_device_list_entry *aranet_raw();
+
+#define for_each_aranet_device(_dev) \
+    for (aranet_device_list_entry* _dev = aranet_raw(); _dev != NULL; _dev = _dev->next)
 
 #endif // ARANET_H

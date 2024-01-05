@@ -1,12 +1,25 @@
 #include "aranet.h"
 
+#include <stdlib.h>
 #include <time.h>
 
 #include "bluetooth_eir.h"
 #include "config.h"
 
-// It seems to show up as a separate company coming from the same MAC
-#define ARANET_DATA_COMPANY_ID 1794
+static aranet_device_list_entry aranet_single_item = {
+    .next = NULL,
+    .data = {0},
+    .address = NULL,
+    .name = NULL,
+    .alias = NULL,
+    .last_seen = 0,
+    .samples_counted = 0
+};
+
+aranet_device_list_entry *aranet_raw() {
+    if (aranet_single_item.address == NULL) return NULL;
+    return &aranet_single_item;
+}
 
 static void now_as_string(char *const buf, const size_t buf_size) {
     struct timespec tp;
@@ -14,6 +27,15 @@ static void now_as_string(char *const buf, const size_t buf_size) {
     clock_gettime(CLOCK_REALTIME, &tp);
     strftime(buf, buf_size, "%Y-%m-%d %H:%M:%S", gmtime_r(&tp.tv_sec, &tm));
 }
+
+static uint64_t now() {
+    struct timespec tp;
+    clock_gettime(CLOCK_REALTIME, &tp);
+    return (uint64_t) tp.tv_sec * 1000 + (uint64_t) tp.tv_nsec / 1000000;
+}
+
+// It seems to show up as a separate company coming from the same MAC
+#define ARANET_DATA_COMPANY_ID 1794
 
 void handle_aranet_event_advertising_packet(const le_advertising_info *const info) {
     char address[18] = {0};
@@ -33,12 +55,35 @@ void handle_aranet_event_advertising_packet(const le_advertising_info *const inf
         return;
     }
 
+    memcpy(&aranet_single_item.data, meta_payload->data, sizeof(aranet_single_item.data));
+    aranet_single_item.last_seen = now();
+    aranet_single_item.samples_counted++;
+    if (aranet_single_item.address != NULL) {
+        char *old = aranet_single_item.address;
+        aranet_single_item.address = strdup(address);
+        free(old);
+    } else aranet_single_item.address = strdup(address);
+    if (aranet_single_item.name != NULL) {
+        char *old = aranet_single_item.name;
+        aranet_single_item.name = strdup(name);
+        free(old);
+    } else aranet_single_item.name = strdup(name);
+    if (aranet_single_item.alias != NULL) {
+        char *old = aranet_single_item.alias;
+        aranet_single_item.alias = strdup(alias);
+        free(old);
+    } else aranet_single_item.alias = strdup(alias);
+
+
     if (cfg_is_verbose_enabled()) {
         char time_string[22] = {0};
         now_as_string(time_string, sizeof(time_string));
         printf(
-            "%s: ARANET DEVICE - MAC: %s, Name: %s, Device: %s\n",
-            time_string, address, name, alias == NULL ? "Unknown" : alias);
+            "%s: ARANET DEVICE - MAC: %s, Name: %s, Device: %s, T: %.2f°C, H: %d%%, P: %.1f hPa, bat: %d%%, CO2: %d ppm\n",
+            time_string, address, name, alias == NULL ? "Unknown" : alias,
+            get_temperature(&aranet_single_item.data), aranet_single_item.data.humidity,
+            get_pressure(&aranet_single_item.data), aranet_single_item.data.battery,
+            aranet_single_item.data.co2);
         fflush(stdout);
     }
 }

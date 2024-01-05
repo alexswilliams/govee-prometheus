@@ -8,9 +8,9 @@
 // Everything in this linked list is shared between the two worker threads - one writer and one reader.
 // Volatile as it must not be optimised out; but no real bother about atomicity - assuming word-length writes are
 // atomic it will always be updated in a way that preserves a sensible list.
-static device_list_entry *volatile list = NULL;
+static govee_device_list_entry *volatile list = NULL;
 
-device_list_entry *govee_device_list_raw() {
+govee_device_list_entry *govee_device_list_raw() {
     return list;
 }
 
@@ -20,8 +20,8 @@ static uint64_t now() {
     return (uint64_t) tp.tv_sec * 1000 + (uint64_t) tp.tv_nsec / 1000000;
 }
 
-static device_list_entry *find_sensor_by_address(const char *const address) {
-    for (device_list_entry *node = list; node != NULL; node = node->next) {
+static govee_device_list_entry *find_sensor_by_address(const char *const address) {
+    for (govee_device_list_entry *node = list; node != NULL; node = node->next) {
         const int comparison = strcmp(address, node->address);
         if (comparison == 0) return node;
         if (comparison < 0) return NULL;
@@ -30,8 +30,8 @@ static device_list_entry *find_sensor_by_address(const char *const address) {
 }
 
 static void add_new_sensor(const char *const address, const char *const name, const char *const alias,
-                           const sensor_data *const data) {
-    device_list_entry *const new_sensor = malloc(sizeof(device_list_entry));
+                           const govee_sensor_data *const data) {
+    govee_device_list_entry *const new_sensor = malloc(sizeof(govee_device_list_entry));
     new_sensor->address = strdup(address);
     new_sensor->name = strdup(name);
     new_sensor->alias = strdup(alias);
@@ -39,15 +39,15 @@ static void add_new_sensor(const char *const address, const char *const name, co
     new_sensor->last_seen = now();
     new_sensor->samples_counted = 1;
 
-    device_list_entry *volatile *node_ptr = &list;
+    govee_device_list_entry *volatile *node_ptr = &list;
     while (*node_ptr != NULL && strcmp(address, (*node_ptr)->address) > 0) node_ptr = &(*node_ptr)->next;
     new_sensor->next = *node_ptr;
     *node_ptr = new_sensor;
 }
 
 void add_or_update_govee_sensor_by_address(const char *const address, const char *const name, const char *const alias,
-                                           const sensor_data *const data) {
-    device_list_entry *const existing_sensor = find_sensor_by_address(address);
+                                           const govee_sensor_data *const data) {
+    govee_device_list_entry *const existing_sensor = find_sensor_by_address(address);
     if (existing_sensor == NULL) {
         add_new_sensor(address, name, alias, data);
     } else {
@@ -69,10 +69,10 @@ void add_or_update_govee_sensor_by_address(const char *const address, const char
 
 
 void destory_govee_device_list() {
-    device_list_entry *this_node = list;
+    govee_device_list_entry *this_node = list;
     list = NULL;
     while (this_node != NULL) {
-        device_list_entry *next_node = this_node->next;
+        govee_device_list_entry *next_node = this_node->next;
         free(this_node->address);
         free(this_node->alias);
         free(this_node->name);

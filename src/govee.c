@@ -23,7 +23,7 @@ typedef struct {
 #define govee_ntohl(it) it
 #endif
 
-static void interpret_payload(const govee_payload *const data, sensor_data *const out) {
+static void interpret_payload(const govee_payload *const data, govee_sensor_data *const out) {
     out->has_error = (data->battery_level_and_error & 0x80) != 0;
     out->battery_percent = data->battery_level_and_error & 0x7f;
     const int word = govee_ntohl(data->data_word);
@@ -60,7 +60,7 @@ void handle_govee_event_advertising_packet(const le_advertising_info *const info
     }
 
     const govee_payload *const payload = (govee_payload *) meta_payload->data;
-    sensor_data result;
+    govee_sensor_data result;
     interpret_payload(payload, &result);
     add_or_update_govee_sensor_by_address(address, name, alias == NULL ? "Unknown" : alias, &result);
 
