@@ -7,6 +7,7 @@
 #include "config.h"
 #include "govee_device_list.h"
 #include "interrupts.h"
+#include "aranet.h"
 
 void ble_thread_entrypoint();
 
@@ -52,13 +53,14 @@ int main(void) {
     setup_interrupt_trapping(interrupt_all);
 
     if (pthread_join(ble_thread, NULL) != 0) panic("Could not join with BLE thread");
-    printf("BLE thread exited\n");
+    puts("BLE thread exited\n");
     fflush(stdout);
     if (pthread_join(prom_thread, NULL) != 0) panic("Could not join with Prometheus thread");
-    printf("Prom thread exited\n");
+    puts("Prom thread exited\n");
     fflush(stdout);
 
     destory_govee_device_list();
+    destroy_aranet_event_data();
     destroy_config();
     exit(0);
 }

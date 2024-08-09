@@ -51,39 +51,47 @@ void handle_aranet_event_advertising_packet(const le_advertising_info *const inf
     ba2str(&info->bdaddr, address);
     const char *const alias = alias_from_address_or_null(address);
     if (read_name_from_eir(info->data, info->length, name, sizeof(name) - 1) < 0)
-        strcpy(name, "(unknown)");
+        strcpy(name, UNKNOWN);
 
     const meta_manufacturer_payload *const meta_payload = read_manufacturer_data_from_eir(info->data, info->length);
-    if (meta_payload == NULL) {
-        fprintf(stderr, "Could not read manufacturer data from payload\n");
-        fflush(stderr);
-        return;
-    }
-    if (btohs(meta_payload->company_id) != ARANET_DATA_COMPANY_ID) {
+    if (meta_payload == NULL || btohs(meta_payload->company_id) != ARANET_DATA_COMPANY_ID) {
         return;
     }
 
     memcpy(&aranet_single_item.data, meta_payload->data, sizeof(aranet_single_item.data));
     aranet_single_item.last_seen = now();
     aranet_single_item.samples_counted++;
-    if (aranet_single_item.address != NULL) {
-        char *old = aranet_single_item.address;
-        aranet_single_item.address = strdup(address);
-        free(old);
-    } else aranet_single_item.address = strdup(address);
-    if (aranet_single_item.name != NULL) {
-        char *old = aranet_single_item.name;
-        aranet_single_item.name = strdup(name);
-        free(old);
-    } else aranet_single_item.name = strdup(name);
-    if (aranet_single_item.alias != NULL) {
-        char *old = aranet_single_item.alias;
-        if (alias != NULL) aranet_single_item.alias = strdup(alias);
-        else aranet_single_item.alias = "(unknwon)";
-        free(old);
-    } else if (alias != NULL) aranet_single_item.alias = strdup(alias);
-    else aranet_single_item.alias = "(unknown)";
 
+    if (aranet_single_item.address == NULL) {
+        aranet_single_item.address = strdup(address);
+    } else {
+        if (strncmp(aranet_single_item.address, address, 18) != 0) {
+            char *old = aranet_single_item.address;
+            aranet_single_item.address = strdup(address);
+            free(old);
+        }
+    }
+
+    if (aranet_single_item.name == NULL) {
+        aranet_single_item.name = strdup(name);
+    } else {
+        if (strncmp(aranet_single_item.name, name, 30) != 0) {
+            char *old = aranet_single_item.name;
+            aranet_single_item.name = strdup(name);
+            free(old);
+        }
+    }
+
+    const char *const new_alias = alias == NULL ? UNKNOWN : alias;
+    if (aranet_single_item.alias == NULL) {
+        aranet_single_item.alias = strdup(new_alias);
+    } else {
+        if (strcmp(aranet_single_item.alias, new_alias) != 0) {
+            char *old = aranet_single_item.alias;
+            aranet_single_item.alias = strdup(new_alias);
+            free(old);
+        }
+    }
 
     if (cfg_is_verbose_enabled()) {
         char time_string[22] = {0};
@@ -95,5 +103,17 @@ void handle_aranet_event_advertising_packet(const le_advertising_info *const inf
             get_aranet_pressure(&aranet_single_item.data), aranet_single_item.data.battery,
             aranet_single_item.data.co2);
         fflush(stdout);
+    }
+}
+
+void destroy_aranet_event_data() {
+    aranet_device_list_entry *this_node = &aranet_single_item;
+    while (this_node != NULL) {
+        aranet_device_list_entry *next_node = this_node->next;
+        if (this_node->address != NULL) free(this_node->address);
+        if (this_node->name != NULL) free(this_node->name);
+        if (this_node->alias != NULL) free(this_node->alias);
+        if (this_node != &aranet_single_item) free(this_node);
+        this_node = next_node;
     }
 }

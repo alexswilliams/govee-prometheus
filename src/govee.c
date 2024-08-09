@@ -27,9 +27,9 @@ static void interpret_payload(const govee_payload *const data, govee_sensor_data
     out->has_error = (data->battery_level_and_error & 0x80) != 0;
     out->battery_percent = data->battery_level_and_error & 0x7f;
     const int word = govee_ntohl(data->data_word);
-    const float temperature = (word & 0x7fffff) / 1000 / 10.0f;
+    const float temperature = ((word & 0x7fffff) / 1000) / 10.0f;
     out->temperature = (word & 0x7fffff) != 0 && word & 0x800000 ? -temperature : temperature;
-    out->humidity = (word & 0x7fffff) % 1000 / 10.0f;
+    out->humidity = ((word & 0x7fffff) % 1000) / 10.0f;
 }
 
 static void now_as_string(char *const buf, const size_t buf_size) {
@@ -50,12 +50,7 @@ void handle_govee_event_advertising_packet(const le_advertising_info *const info
         strcpy(name, "(unknown)");
 
     const meta_manufacturer_payload *const meta_payload = read_manufacturer_data_from_eir(info->data, info->length);
-    if (meta_payload == NULL) {
-        fprintf(stderr, "Could not read manufacturer data from payload\n");
-        fflush(stderr);
-        return;
-    }
-    if (btohs(meta_payload->company_id) != GOVEE_COMPANY_ID) {
+    if (meta_payload == NULL || btohs(meta_payload->company_id) != GOVEE_COMPANY_ID) {
         return;
     }
 

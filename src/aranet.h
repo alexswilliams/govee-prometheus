@@ -40,6 +40,8 @@ float get_aranet_pressure(const aranet_data *data);
 
 void handle_aranet_event_advertising_packet(const le_advertising_info *info);
 
+void destroy_aranet_event_data();
+
 typedef struct _aranet_device_list_entry {
     struct _aranet_device_list_entry *next;
     aranet_data data;
@@ -49,6 +51,8 @@ typedef struct _aranet_device_list_entry {
     uint64_t last_seen;
     uint64_t samples_counted;
 } aranet_device_list_entry;
+
+static char *const UNKNOWN = "(unknown)";
 
 aranet_device_list_entry *aranet_raw();
 

@@ -1,4 +1,4 @@
-FROM docker.io/gcc:14.1.0-bookworm as build
+FROM docker.io/gcc:14.2.0-bookworm AS build
 RUN apt-get update && apt-get install -y libbluetooth-dev
 COPY . /usr/src/govee-prometheus
 WORKDIR /usr/src/govee-prometheus
