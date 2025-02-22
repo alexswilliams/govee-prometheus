@@ -165,7 +165,7 @@ int populate_config() {
         }
     }
 
-    const char *const env_metric_ttl_seconds = getenv("METRIC_TTL_MS");
+    const char *const env_metric_ttl_seconds = getenv("METRIC_TTL_SECONDS");
     if (env_metric_ttl_seconds != NULL) {
         uint16_t result;
         if (parse_to_ushort(env_metric_ttl_seconds, &result) != 0) {
