@@ -17,8 +17,8 @@ typedef struct _govee_device_list_entry {
 govee_device_list_entry *govee_device_list_raw();
 
 #define for_each_govee_device(_dev) \
-    for (const govee_device_list_entry *_dev = govee_device_list_raw(); _dev != NULL; _dev = _dev->next) \
-        if (now() - _dev->last_seen < cfg_metric_ttl_seconds() * 1000)
+    for (const govee_device_list_entry *(_dev) = govee_device_list_raw(); (_dev) != NULL; (_dev) = (_dev)->next) \
+        if (now() - (_dev)->last_seen < cfg_metric_ttl_seconds() * 1000)
 
 void add_or_update_govee_sensor_by_address(const char *address, const char *name, const char *alias,
                                            const govee_sensor_data *data);

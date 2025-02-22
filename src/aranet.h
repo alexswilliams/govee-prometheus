@@ -59,7 +59,7 @@ static char *const UNKNOWN = "(unknown)";
 aranet_device_list_entry *aranet_raw();
 
 #define for_each_aranet_device(_dev) \
-    for (aranet_device_list_entry* _dev = aranet_raw(); _dev != NULL; _dev = _dev->next) \
-        if (now() - _dev->last_seen < cfg_metric_ttl_seconds() * 1000)
+    for (aranet_device_list_entry* (_dev) = aranet_raw(); (_dev) != NULL; (_dev) = (_dev)->next) \
+        if (now() - (_dev)->last_seen < cfg_metric_ttl_seconds() * 1000)
 
 #endif // ARANET_H
