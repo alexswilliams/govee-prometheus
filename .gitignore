@@ -1,2 +1,4 @@
 bin/
 out/
+/.idea/govee-prometheus.iml
+/.idea/modules.xml

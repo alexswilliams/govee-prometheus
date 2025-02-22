@@ -15,4 +15,6 @@ uint8_t cfg_ignore_duplicates();
 uint16_t cfg_scan_window();
 
 uint16_t cfg_scan_interval();
+
+uint16_t cfg_metric_ttl_seconds();
 #endif // CONFIG_H

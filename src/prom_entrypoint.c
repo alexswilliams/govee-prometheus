@@ -12,7 +12,7 @@
 
 
 static char *build_metrics_response() {
-    char *const metrics = build_metrics();
+    char *const metrics = build_metrics_prometheus_response();
     if (metrics == NULL) {
         return strdup("HTTP/1.0 500 Internal Server Error\nConnection: Close\n\n");
     }

@@ -18,7 +18,7 @@ void write_expanding(char **buf, const int offset, size_t *const buf_size, const
     strncpy(*buf + offset, str, *buf_size - offset - 1);
 }
 
-char *build_metrics() {
+char *build_metrics_prometheus_response() {
     size_t buf_size = BUF_SIZE;
     int offset = 0;
     char *buf = malloc(buf_size);

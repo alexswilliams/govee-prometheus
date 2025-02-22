@@ -1,7 +1,6 @@
 #include "govee_device_list.h"
 
 #include <stdlib.h>
-#include <time.h>
 
 #include "govee.h"
 
@@ -12,12 +11,6 @@ static govee_device_list_entry *volatile list = NULL;
 
 govee_device_list_entry *govee_device_list_raw() {
     return list;
-}
-
-static uint64_t now() {
-    struct timespec tp;
-    clock_gettime(CLOCK_REALTIME, &tp);
-    return (uint64_t) tp.tv_sec * 1000 + (uint64_t) tp.tv_nsec / 1000000;
 }
 
 static govee_device_list_entry *find_sensor_by_address(const char *const address) {
@@ -68,7 +61,7 @@ void add_or_update_govee_sensor_by_address(const char *const address, const char
 }
 
 
-void destory_govee_device_list() {
+void destroy_govee_device_list() {
     govee_device_list_entry *this_node = list;
     list = NULL;
     while (this_node != NULL) {

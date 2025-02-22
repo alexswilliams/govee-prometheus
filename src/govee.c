@@ -2,7 +2,6 @@
 
 #include <byteswap.h>
 #include <stdio.h>
-#include <time.h>
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 
@@ -30,13 +29,6 @@ static void interpret_payload(const govee_payload *const data, govee_sensor_data
     const float temperature = ((word & 0x7fffff) / 1000) / 10.0f;
     out->temperature = (word & 0x7fffff) != 0 && word & 0x800000 ? -temperature : temperature;
     out->humidity = ((word & 0x7fffff) % 1000) / 10.0f;
-}
-
-static void now_as_string(char *const buf, const size_t buf_size) {
-    struct timespec tp;
-    struct tm tm;
-    clock_gettime(CLOCK_REALTIME, &tp);
-    strftime(buf, buf_size, "%Y-%m-%d %H:%M:%S", gmtime_r(&tp.tv_sec, &tm));
 }
 
 #define GOVEE_COMPANY_ID 60552

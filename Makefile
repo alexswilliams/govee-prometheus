@@ -10,7 +10,8 @@ OBJECTS:= \
 	out/govee_device_list.o \
 	out/metrics.o \
 	out/config.o \
-	out/aranet.o
+	out/aranet.o \
+	out/timeutil.o
 BINARY:=bin/monitor
 
 .PHONY: clean all

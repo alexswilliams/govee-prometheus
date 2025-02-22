@@ -1,7 +1,6 @@
 #include "aranet.h"
 
 #include <stdlib.h>
-#include <time.h>
 
 #include "bluetooth_eir.h"
 #include "config.h"
@@ -27,19 +26,6 @@ float get_aranet_temperature(const aranet_data *data) {
 
 float get_aranet_pressure(const aranet_data *data) {
     return data->pressure / 10.0;
-}
-
-static void now_as_string(char *const buf, const size_t buf_size) {
-    struct timespec tp;
-    struct tm tm;
-    clock_gettime(CLOCK_REALTIME, &tp);
-    strftime(buf, buf_size, "%Y-%m-%d %H:%M:%S", gmtime_r(&tp.tv_sec, &tm));
-}
-
-static uint64_t now() {
-    struct timespec tp;
-    clock_gettime(CLOCK_REALTIME, &tp);
-    return (uint64_t) tp.tv_sec * 1000 + (uint64_t) tp.tv_nsec / 1000000;
 }
 
 // It seems to show up as a separate company coming from the same MAC

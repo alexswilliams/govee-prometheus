@@ -59,7 +59,7 @@ int main(void) {
     puts("Prom thread exited\n");
     fflush(stdout);
 
-    destory_govee_device_list();
+    destroy_govee_device_list();
     destroy_aranet_event_data();
     destroy_config();
     exit(0);

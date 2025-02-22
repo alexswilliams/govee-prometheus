@@ -25,13 +25,19 @@ static volatile struct config {
     uint16_t scan_window;
     device_alias_item *aliases;
     int verbose;
+    uint16_t metric_ttl_seconds;
 } config = {
     KEEP_DUPLICATES,
     53,
     17,
     NULL,
-    QUIET
+    QUIET,
+    2 * 60 - 10
 };
+
+uint16_t cfg_metric_ttl_seconds() {
+    return config.metric_ttl_seconds;
+}
 
 uint16_t cfg_scan_interval() {
     return config.scan_interval;
@@ -159,6 +165,16 @@ int populate_config() {
         }
     }
 
+    const char *const env_metric_ttl_seconds = getenv("METRIC_TTL_MS");
+    if (env_metric_ttl_seconds != NULL) {
+        uint16_t result;
+        if (parse_to_ushort(env_metric_ttl_seconds, &result) != 0) {
+            fprintf(stderr, "Invalid number passed to config: %s\n", env_metric_ttl_seconds);
+            return -1;
+        }
+        config.metric_ttl_seconds = result;
+    }
+
     const char *const env_ignore_duplicates = getenv("BLE_IGNORE_DUPLICATES");
     if (env_ignore_duplicates != NULL) {
         if (strcasecmp(env_ignore_duplicates, "true") == 0) {
@@ -172,7 +188,7 @@ int populate_config() {
     if (env_scan_interval != NULL) {
         uint16_t result;
         if (parse_to_ushort(env_scan_interval, &result) != 0) {
-            fprintf(stderr, "Invaid number passed to config: %s\n", env_scan_interval);
+            fprintf(stderr, "Invalid number passed to config: %s\n", env_scan_interval);
             return -1;
         }
         config.scan_interval = result;
@@ -181,7 +197,7 @@ int populate_config() {
     if (env_scan_window != NULL) {
         uint16_t result;
         if (parse_to_ushort(env_scan_window, &result) != 0) {
-            fprintf(stderr, "Invaid number passed to config: %s\n", env_scan_window);
+            fprintf(stderr, "Invalid number passed to config: %s\n", env_scan_window);
             return -1;
         }
         config.scan_window = result;
@@ -213,11 +229,13 @@ int populate_config() {
             " • Log output: %s\n"
             " • Duplicate messages: %s\n"
             " • Scan interval: %d (%.3fms)\n"
-            " • Scan window: %d (%.3fms)\n",
+            " • Scan window: %d (%.3fms)\n"
+            " • Metric TTL: %ds\n",
             config.verbose == VERBOSE ? "verbose" : "quiet",
             config.scan_ignore_duplicates == REMOVE_DUPLICATES ? "remove" : "keep",
             config.scan_interval, config.scan_interval * 0.625f,
-            config.scan_window, config.scan_window * 0.625f
+            config.scan_window, config.scan_window * 0.625f,
+            config.metric_ttl_seconds
     );
     if (config.aliases != NULL) {
         fprintf(stderr, "Known aliases:\n");

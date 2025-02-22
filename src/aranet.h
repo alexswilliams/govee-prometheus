@@ -2,6 +2,8 @@
 #define ARANET_H
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
+#include "timeutil.h"
+#include "config.h"
 
 // Sourced from https://github.com/Anrijs/Aranet4-ESP32/blob/main/src/Aranet4.h
 #define AR4_PACKING_ARANET4     1
@@ -57,6 +59,7 @@ static char *const UNKNOWN = "(unknown)";
 aranet_device_list_entry *aranet_raw();
 
 #define for_each_aranet_device(_dev) \
-    for (aranet_device_list_entry* _dev = aranet_raw(); _dev != NULL; _dev = _dev->next)
+    for (aranet_device_list_entry* _dev = aranet_raw(); _dev != NULL; _dev = _dev->next) \
+        if (now() - _dev->last_seen < cfg_metric_ttl_seconds() * 1000)
 
 #endif // ARANET_H
